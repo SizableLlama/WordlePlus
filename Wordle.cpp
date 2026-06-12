@@ -1,30 +1,35 @@
 #include <iostream>
-//#include <SDL2>
-//#include <random>
+#include <SDL2/SDL.h>
+#include <random>
 #include <vector>
 #include <string>
-//#include <array>
+#include <array>
 #include <cctype>
 
 using namespace std;
 bool in(char comparitor, const string& input);
-bool in(char comparitor,const vector<char>& input);
+bool in(char comparitor,const array<char, 5>& input);
 string toLower(const string& String);
-string printVector(const vector<char>& v);
+string printArray(const array<char, 5>& Array);
+string printArray(const array<char, 26>& Array);
+bool in(char comparitor,const array<char, 26>& input);
 
 string wordGenerator(){
-	vector<string> wordArray={"apple", "beach", "cloud", "dance", "eagle", "flame", "grape", "house", "image", "juice", "koala", "lemon", "music", "night", "ocean", "piano", "queen", "river", "smile", "table", "uncle", "voice", "water", "xenon",
-               "yacht", "zebra", "alarm", "bread", "candy", "dream", "earth", "field", "ghost", "heart", "ivory", "jelly", "knife", "light", "mouse", "nurse", "onion", "paper", "quiet", "radio", "stone", "tiger", "under", "vivid",
-               "whale", "young"};
-	int pos = rand() % 51;
-	string word=wordArray[pos];
-	cout<<word<<" \n";
+	//Generating a word using hardware or something. Hopefully will connect it to a database too.
+	vector<string> wordArray={"apple", "beach", "cloud", "dance", "eagle", "flame", "grape", "house", "image", "juice", "koala", "lemon", "music", "night", "ocean", "piano", "queen", "river", "smile", "table", "uncle",
+		"voice", "water", "xenon", "yacht", "zebra", "alarm", "bread", "candy", "dream", "earth", "field", "ghost", "heart", "ivory", "jelly", "knife", "light", "mouse", "nurse", "onion", "paper", "quiet", "radio",
+		"stone", "tiger", "under", "vivid", "whale", "young"};
+	random_device rd;
+	mt19937 eng(rd());
+	uniform_int_distribution<> distr(0,49);
+	string word=wordArray.at(distr(eng));
+	//cout<<word<<" \n";
 	return word;
 };
 
 bool guessCheckLen(string& guess){
+	//If length is 5 continue, probably didn't need a comment.
 	if(guess.length() == 5){
-		//cout<<"Invalid guess.\n";
 		return true;
 	}
 	else{
@@ -32,59 +37,73 @@ bool guessCheckLen(string& guess){
 	}
 }
 
-void appendingArrays(string word,string guess, vector<char>& correctArray, vector<char>& wrongPlaceArray,vector<char>& wrongLetterArray){
-	//x<6 instead of 7, since 0? 0,1,2,3,4,5 could also be 5
+void appendingArrays(string word, string guess, array<char, 5>& correctArray, array<char, 5>& wrongPlaceArray, array<char, 26>& wrongLetterArray, int& incorrectLetters, int& wrongPlace){
+	//incorrectLetters and wrongPlace
+	//Are to stop the two wrong arrays from being over written.
 	for(int x=0;x<5;x++){
-		if(guess[x]==word[x]){
-			correctArray.at(x)=guess[x];
+		if(guess.at(x)==word.at(x)){
+			correctArray.at(x)=guess.at(x);
 		}
-		else if(in(guess[x],word)){
-			if(!in(guess[x],wrongPlaceArray)){
-				wrongPlaceArray.push_back(guess[x]);
+		else if(in(guess.at(x),word)){
+			if(!in(guess.at(x),wrongPlaceArray)){
+				wrongPlaceArray.at(wrongPlace)=guess.at(x);
+				wrongPlace++;
 			}
 		}
 		else{
-			if(!in(guess[x],wrongLetterArray)){
-				wrongLetterArray.push_back(guess[x]);
+			if(!in(guess.at(x),wrongLetterArray)){
+				wrongLetterArray.at(incorrectLetters)=guess.at(x);
+				incorrectLetters++;
 			}
 		}
 	}
 
 }
 
-vector<char> alphabet={'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-
 int main(){
+	//The target word helpfully called word.
 	string word = wordGenerator();
 
+	int incorrectLetters=0;
+	int wrongPlace=0;
+
+	//The number of attempts called counter for some reason.
 	int counter=0;
-	vector<char> correctArray={'_','_','_','_','_'};
-	vector<char> wrongPlaceArray={};
-	vector<char> wrongLetterArray={};
+
+	array<char, 5> correctArray={'_','_','_','_','_'};
+	array<char, 5> wrongPlaceArray={'_','_','_','_','_'};
+	array<char, 26> wrongLetterArray={'_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_'};
+
 	string guess;
+
+	//The main loop of the game.
 	while(counter<6){
-		cout<<"Please guess a five letter word.\n:";
+		cout<<"Attempt: "<<counter<<"\n"<<"Please guess a five letter word.\n:";
 		cin>>guess;
-		guess=toLower(guess);
-		//Made it false, could work? Hopefully?
+		//Convert the guess to lower-case
+		guess = toLower(guess);
+
+		/*If the guess isn't 5 characters long, the counter isn't updated.
+		And the user is moved to the top of the while.*/
 		if(!guessCheckLen(guess)){
 			cout<<"Invalid guess.\n";
 			continue;
 		};
 
-		appendingArrays(word,guess,correctArray,wrongPlaceArray,wrongLetterArray);
+		appendingArrays(word,guess,correctArray,wrongPlaceArray,wrongLetterArray,incorrectLetters,wrongPlace);
 		counter++;
 
 
 
-
-		cout<<"Correct letter correct place: "<<printVector(correctArray)<<"\nCorrect letter wrong place: "<<printVector(wrongPlaceArray)<<"\n Wrong letter: "<<printVector(wrongLetterArray);
-
+		//Display the arrays and go to the top of the while.
+		cout<<"Correct letter correct place: "<<printArray(correctArray)<<"\nCorrect letter wrong place: "<<printArray(wrongPlaceArray)<<"\nWrong letter: "<<printArray(wrongLetterArray)<<"\n";
 		if (guess==word){
+			//No error and a win!
 			cout<<"You win in "<<counter<<" attempts!\n";
 			return 0;
 		}
 	if (counter==6){
+		//No error and a loss.
 		cout<<"You lose! The word was "<<word<<".\n";
 	}
 
@@ -92,7 +111,9 @@ int main(){
 	return 0;
 }
 
-bool in(char comparitor,const vector<char>& input){
+bool in(char comparitor,const array<char, 5>& input){
+	/*I made this, although I believe it exists in the algorithms file.
+	Apparently size_t is better here?*/
 	for(size_t x=0; x<input.size(); x++){
 		if(comparitor==input.at(x)){
 			return true;
@@ -110,24 +131,43 @@ bool in(char comparitor, const string& input){
 	return false;
 }
 
-
+bool in(char comparitor,const array<char, 26>& input){
+	for(size_t x=0; x<input.size(); x++){
+		if(comparitor==input.at(x)){
+			return true;
+		};
+	};
+	return false;
+}
 
 
 
 string toLower(const string& String){
 	string lowerString;
-	for(size_t x=0; x<String.length(); x++){
-		lowerString=lowerString + (char)tolower(String[x]);
+	//Make the string lower-case.
+	for(size_t x=0; x < String.length(); x++){
+		lowerString=lowerString + (char)tolower(String.at(x));
 	}
 	return lowerString;
 }
 
-string printVector(const vector<char>& v){
+string printArray(const array<char, 5>& Array){
 	string String;
-	for(size_t x=0; x < v.size(); x++){
-        	String=String+v.at(x);
-			//std::print("{}", v[x]);
-    };
-	cout<<String;
+	//Convert the array to a string, since they're only a max of 26 chars.
+	for(size_t x=0; x < Array.size(); x++){
+		String=String+Array.at(x);
+	};
+
+
+	return String;
+};
+
+string printArray(const array<char, 26>& Array){
+	string String;
+	for(size_t x=0; x < Array.size(); x++){
+		String=String+Array.at(x);
+	};
+
+
 	return String;
 };
