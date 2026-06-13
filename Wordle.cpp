@@ -1,7 +1,6 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <random>
-#include <vector>
 #include <string>
 #include <array>
 #include <cctype>
@@ -16,7 +15,7 @@ bool in(char comparitor,const array<char, 26>& input);
 
 string wordGenerator(){
 	//Generating a word using hardware or something. Hopefully will connect it to a database too.
-	vector<string> wordArray={"apple", "beach", "cloud", "dance", "eagle", "flame", "grape", "house", "image", "juice", "koala", "lemon", "music", "night", "ocean", "piano", "queen", "river", "smile", "table", "uncle",
+	array<string, 50> wordArray={"apple", "beach", "cloud", "dance", "eagle", "flame", "grape", "house", "image", "juice", "koala", "lemon", "music", "night", "ocean", "piano", "queen", "river", "smile", "table", "uncle",
 		"voice", "water", "xenon", "yacht", "zebra", "alarm", "bread", "candy", "dream", "earth", "field", "ghost", "heart", "ivory", "jelly", "knife", "light", "mouse", "nurse", "onion", "paper", "quiet", "radio",
 		"stone", "tiger", "under", "vivid", "whale", "young"};
 	random_device rd;
